@@ -33,6 +33,7 @@
 #endif
 
 #define LENGTH(X)	(sizeof (X) / sizeof ((X)[0]))
+#define NO_WARN (void)!
 
 const char *argv0;
 
@@ -271,24 +272,24 @@ redraw()
 	/* clear screen */
 	dprintf(STDOUT_FILENO, "\033[2J");
 	/* set cursor position to upper left corner */
-	write(STDOUT_FILENO, "\033[0;0H", 6);
+	NO_WARN write(STDOUT_FILENO, "\033[0;0H", 6);
 
 	/* remove newline of first line as we are at 0,0 already */
 	if (bottom->size > 0 && bottom->buf[0] == '\n')
-		write(STDOUT_FILENO, bottom->buf + 1, bottom->size - 1);
+		NO_WARN write(STDOUT_FILENO, bottom->buf + 1, bottom->size - 1);
 	else
-		write(STDOUT_FILENO, bottom->buf, bottom->size);
+		NO_WARN write(STDOUT_FILENO, bottom->buf, bottom->size);
 
 	for (rows = ws.ws_row; rows > 0 &&
 	    TAILQ_PREV(bottom, tailhead, entries) != NULL; rows--) {
 		bottom = TAILQ_PREV(bottom, tailhead, entries);
-		write(STDOUT_FILENO, bottom->buf, bottom->size);
+		NO_WARN write(STDOUT_FILENO, bottom->buf, bottom->size);
 	}
 
 	if (bottom == TAILQ_FIRST(&head)) {
 		/* add new line in front of the shell prompt */
-		write(STDOUT_FILENO, "\n", 1);
-		write(STDOUT_FILENO, "\033[?25h", 6);	/* show cursor */
+		NO_WARN write(STDOUT_FILENO, "\n", 1);
+		NO_WARN write(STDOUT_FILENO, "\033[?25h", 6);	/* show cursor */
 	} else
 		bottom = TAILQ_NEXT(bottom, entries);
 }
@@ -326,15 +327,15 @@ scrollup(int n)
 	/* move the text in terminal rows lines down */
 	dprintf(STDOUT_FILENO, "\033[%dT", n);
 	/* set cursor position to upper left corner */
-	write(STDOUT_FILENO, "\033[0;0H", 6);
+	NO_WARN write(STDOUT_FILENO, "\033[0;0H", 6);
 	/* hide cursor */
-	write(STDOUT_FILENO, "\033[?25l", 6);
+	NO_WARN write(STDOUT_FILENO, "\033[?25l", 6);
 
 	/* remove newline of first line as we are at 0,0 already */
 	if (scrollend->size > 0 && scrollend->buf[0] == '\n')
-		write(STDOUT_FILENO, scrollend->buf + 1, scrollend->size - 1);
+		NO_WARN write(STDOUT_FILENO, scrollend->buf + 1, scrollend->size - 1);
 	else
-		write(STDOUT_FILENO, scrollend->buf, scrollend->size);
+		NO_WARN write(STDOUT_FILENO, scrollend->buf, scrollend->size);
 	if (y + n >= ws.ws_row)
 		bottom = TAILQ_NEXT(bottom, entries);
 
@@ -343,12 +344,12 @@ scrollup(int n)
 		scrollend = TAILQ_PREV(scrollend, tailhead, entries);
 		if (y + n >= ws.ws_row)
 			bottom = TAILQ_NEXT(bottom, entries);
-		write(STDOUT_FILENO, scrollend->buf, scrollend->size);
+		NO_WARN write(STDOUT_FILENO, scrollend->buf, scrollend->size);
 	}
 	/* move cursor from line n to the old bottom position */
 	if (y + n < ws.ws_row) {
 		dprintf(STDOUT_FILENO, "\033[%d;%dH", y + n, x);
-		write(STDOUT_FILENO, "\033[?25h", 6);	/* show cursor */
+		NO_WARN write(STDOUT_FILENO, "\033[?25h", 6);	/* show cursor */
 	} else
 		dprintf(STDOUT_FILENO, "\033[%d;0H", ws.ws_row);
 }
@@ -366,12 +367,12 @@ scrolldown(char *buf, size_t size, int n)
 	/* print n lines */
 	while (n > 0 && bottom != NULL && bottom != TAILQ_FIRST(&head)) {
 		bottom = TAILQ_PREV(bottom, tailhead, entries);
-		write(STDOUT_FILENO, bottom->buf, bottom->size);
+		NO_WARN write(STDOUT_FILENO, bottom->buf, bottom->size);
 		n -= (bottom->len - 1) / ws.ws_col + 1;
 	}
 	if (n > 0 && bottom == TAILQ_FIRST(&head)) {
-		write(STDOUT_FILENO, "\033[?25h", 6);	/* show cursor */
-		write(STDOUT_FILENO, buf, size);
+		NO_WARN write(STDOUT_FILENO, "\033[?25h", 6);	/* show cursor */
+		NO_WARN write(STDOUT_FILENO, buf, size);
 	} else if (bottom != NULL)
 		bottom = TAILQ_NEXT(bottom, entries);
 }
