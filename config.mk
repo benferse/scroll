@@ -2,7 +2,7 @@
 VERSION = 0.1
 
 # paths
-PREFIX	= $(HOME)/.local
+PREFIX	= ~/.local
 BINDIR	= $(PREFIX)/bin
 MANDIR	= $(PREFIX)/share/man
 
